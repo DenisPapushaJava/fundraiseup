@@ -1,8 +1,8 @@
 (() => {
   const BUFFER_LIMIT = 3;
-  const POST_INTERVAL = 1000; // 1 second
-  const TRACK_URL = "http://localhost:8888/track";
-  
+  const POST_INTERVAL = 1000;
+  const TRACK_URL = 'http://localhost:8888/track';
+
   const buffer = [];
   let lastSendTime = 0;
   let isSending = false;
@@ -18,20 +18,21 @@
   const sendBuffer = async () => {
     if (buffer.length === 0 || isSending) return;
     const now = Date.now();
-    if (now - lastSendTime < POST_INTERVAL && buffer.length < BUFFER_LIMIT) return;
+    if (now - lastSendTime < POST_INTERVAL && buffer.length < BUFFER_LIMIT)
+      return;
 
     isSending = true;
     const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
     try {
       const response = await fetch(TRACK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(eventsToSend),
       });
-      if (!response.ok) throw new Error("Failed to send events");
+      if (!response.ok) throw new Error('Failed to send events');
       lastSendTime = now;
     } catch (error) {
-      console.error("Error sending events:", error);
+      console.error('Error sending events:', error);
       buffer.unshift(...eventsToSend); // Return events to the buffer
     } finally {
       isSending = false;
@@ -47,6 +48,5 @@
 
   window.tracker = tracker;
 
-  // Send buffer when the page is about to unload
-  window.addEventListener("beforeunload", sendBuffer);
+  window.addEventListener('beforeunload', sendBuffer);
 })();
