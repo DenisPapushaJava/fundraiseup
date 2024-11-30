@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>My website</title>
+    <!-- Snipet -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "http://localhost:8888/tracker";
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "tracker");
+    </script>
+    <script>
+      tracker.track("pageview");
+      tracker.track("test", "one", "two", "three");
+    </script>
+  </head>
+  <body>
+    <button onclick="tracker.track('click-button')">Click me</button>
+    <ul>
+      <li>
+        <a href="/1.html" onclick="tracker.track('click-link', '1')">1.html</a>
+      </li>
+      <li>
+        <a href="/2.html" onclick="tracker.track('click-link', '2')">2.html</a>
+      </li>
+      <li>
+        <a href="/3.html" onclick="tracker.track('click-link', '3', 'three')"
+          >3.html</a
+        >
+      </li>
+    </ul>
+  </body>
+</html>

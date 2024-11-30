@@ -1,6 +1,6 @@
 export default {
   singleQuote: true,
-  trailingComma: 'all',
+  trailingComma: "all",
   tabWidth: 2,
   semi: true,
 };

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITracks extends Document {
   event: string;
@@ -16,4 +16,4 @@ const TracksSchema: Schema = new Schema({
   ts: { type: Number, required: true },
 });
 
-export const Tracks = mongoose.model<ITracks>('Tracks', TracksSchema);
+export const Tracks = mongoose.model<ITracks>("Tracks", TracksSchema);

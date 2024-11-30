@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch ./src --ext ts --exec \"node --loader ts-node/esm ./src/server/app.ts\"",
-    "build": "tsc && vite build",
+    "dev": "nodemon --watch ./src --ext ts --exec \"node --loader ts-node/esm ./src/server/app.ts\"",    
     "lint": "prettier --write ."
   },
   "devDependencies": {
@@ -23,6 +22,7 @@
     "vite": "^6.0.1"
   },
   "dependencies": {
+    "@types/node": "^22.10.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "express": "^4.21.1",
