@@ -1,13 +1,12 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import path from "path";
+import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { connectDB } from "./db.ts";
 import { Tracks } from "./models/TrackerEvent.ts";
 import { validateEvents } from "./validate.ts";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
 
 dotenv.config();
 
@@ -19,22 +18,18 @@ const PORT_TRACKER = process.env.PORT_TRACKER || 8888;
 
 connectDB();
 
+const corsOptions = {
+  origin: ["http://localhost:50000", "http://localhost:8888"],
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
+};
+
 app.use(
-  cors({
-    origin: ["http://localhost:50000"],
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  }),
+  cors(corsOptions),
 );
 
 appHTML.use(
-  cors({
-    origin: ["http://localhost:8888"],
-    methods: ["GET"],
-    allowedHeaders: ["Content-Type"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  }),
+  cors(corsOptions),
 );
 
 app.use(bodyParser.json());
@@ -49,12 +44,14 @@ app.post("/track", async (req, res) => {
   if (!Array.isArray(events) || !validateEvents(events)) {
     return res.status(422).send({ error: "Invalid events" });
   }
-  res.status(200).send({ status: "ok" });
+
   try {
     await Tracks.insertMany(events);
     console.log("Events saved successfully");
+    res.status(200).send({ status: "ok" });
   } catch (error) {
     console.error("Error saving events:", error);
+    res.status(500).send({ error: "Failed to save events" });
   }
 });
 
@@ -62,8 +59,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 appHTML.get("/:page.html", (req, res) => {
-  const { page } = req.params;
-  console.log(page);
+  const { page } = req.params;  
   if (!["1", "2", "3"].includes(page)) {
     return res.status(404).send("Page not found");
   }

@@ -1,24 +1,20 @@
-import { Tracks } from "./models/TrackerEvent.ts";
+import { ITracks } from "./models/TrackerEvent.ts";
 
-export const validateEvents = (events: any[]): boolean => {
-  return events.every((event) => {
+export const validateEvents = (events: unknown[]): boolean => {
+  return events.every((event): event is ITracks => {
     if (typeof event !== "object" || event === null) return false;
 
-    const { event: ev, tags, url, title, ts } = event;
+    const { event: ev, tags, url, title, ts } = event as Partial<ITracks>;
 
-    if (
-      typeof ev !== "string" ||
-      !Array.isArray(tags) ||
-      !tags.every((tag) => typeof tag === "string") ||
-      typeof url !== "string" ||
-      typeof title !== "string" ||
-      typeof ts !== "number" ||
-      !Number.isFinite(ts) ||
-      ts <= 0
-    ) {
-      return false;
-    }
-
-    return true;
+    return (
+      typeof ev === "string" &&
+      Array.isArray(tags) &&
+      tags.every((tag) => typeof tag === "string") &&
+      typeof url === "string" &&
+      typeof title === "string" &&
+      typeof ts === "number" &&
+      Number.isFinite(ts) &&
+      ts > 0
+    );
   });
 };
