@@ -34,4 +34,4 @@ DB_URI=mongodb://localhost:27017/tracker
 
 - Run dev
 - This will run the server on port 50000 for HTML pages and port 8888 for tracking events.
-- Navigate to http://localhost:50000/1.html to see the client-side application.
+- If the browser does not open automatically, you will need to manually go to http://localhost:50000/1.html.
