@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2020",   
+    "target": "ES2020",
     "module": "ESNext",
     "rootDir": "./src",
-    "outDir": "./dist",  
+    "outDir": "./dist",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,    
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,   
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true
   },
   "include": ["src/**/*"],
   "ts-node": {
-    "esm": true
+    "esm": true,
+    "transpileOnly": true,
+    "files": true
   }
 }
