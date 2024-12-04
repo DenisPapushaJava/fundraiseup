@@ -34,8 +34,31 @@
     } catch (error) {
       console.error("Error sending events:", error);
       buffer.unshift(...eventsToSend);
+      setTimeout(sendBuffer, POST_INTERVAL);
     } finally {
       isSending = false;
+    }
+  };
+
+  const sendBufferCloseSession = () => {
+    if (buffer.length === 0) return;
+    const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
+    const blob = new Blob([JSON.stringify(eventsToSend)], {
+      type: "application/json; charset=UTF-8",
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(TRACK_URL, blob);
+    } else {
+      fetch(TRACK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventsToSend),
+        keepalive: true,
+      }).catch((error) => {
+        console.error("Error sending events on unload:", error);
+        buffer.unshift(...eventsToSend);
+        setTimeout(sendBuffer, POST_INTERVAL);
+      });
     }
   };
 
@@ -48,5 +71,25 @@
 
   window.tracker = tracker;
 
-  window.addEventListener("beforeunload", sendBuffer);
+  window.addEventListener("beforeunload", sendBufferCloseSession);
+
+  document.addEventListener("click", async (event) => {
+    if (event.target.tagName === "A") {
+      event.preventDefault();
+      await new Promise((resolve) => {
+        const checkBuffer = () => {
+          if (buffer.length === 0 || isSending) {
+            resolve();
+          } else {
+            setTimeout(checkBuffer, 100);
+          }
+        };
+        checkBuffer();
+      });
+      sendBufferCloseSession();
+      setTimeout(() => {
+        window.location.href = event.target.href;
+      }, 100);
+    }
+  });
 })();

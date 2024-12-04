@@ -22,17 +22,17 @@ const corsOptions = {
   origin: ["http://localhost:50000", "http://localhost:8888"],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
-app.use(
-  cors(corsOptions),
-);
-
-appHTML.use(
-  cors(corsOptions),
-);
+app.use(cors(corsOptions));
+appHTML.use(cors(corsOptions));
 
 app.use(bodyParser.json());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 app.get("/tracker", (_, res) => {
   res.type("application/javascript");
@@ -45,26 +45,30 @@ app.post("/track", async (req, res) => {
     return res.status(422).send({ error: "Invalid events" });
   }
 
-  try {
-    await Tracks.insertMany(events);
-    console.log("Events saved successfully");
-    res.status(200).send({ status: "ok" });
-  } catch (error) {
-    console.error("Error saving events:", error);
-    res.status(500).send({ error: "Failed to save events" });
-  }
+  res.status(200).send({ status: "ok" });
+
+  Promise.allSettled(events.map((event) => Tracks.insertMany(event)))
+    .then((results) => {
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`Error saving event ${index}:`, result.reason);
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error saving events:", error);
+    });
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 appHTML.get("/:page.html", (req, res) => {
-  const { page } = req.params;  
-  if (!["1", "2", "3"].includes(page)) {
+  const { page } = req.params;
+  const validPages = ["1", "2", "3"];
+
+  if (!validPages.includes(page)) {
     return res.status(404).send("Page not found");
   }
   res.type("text/html");
-  res.sendFile(path.join(__dirname, "../client/index.html"));
+  res.sendFile(path.join(__dirname, `../client/${page}.html`));
 });
 
 app.listen(PORT_TRACKER, () =>

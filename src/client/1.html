@@ -1,19 +1,7 @@
 <html>
   <head>
     <title>My website</title>
-    <!-- Snipet -->
-    <script>
-      (function (w, d, s, l, i) {
-        w[l] = w[l] || [];
-        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-        var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
-        j.async = true;
-        j.src = "http://localhost:8888/tracker";
-        f.parentNode.insertBefore(j, f);
-      })(window, document, "script", "tracker");
-    </script>
+    <script src="http://localhost:8888/tracker"></script>
     <script>
       tracker.track("pageview");
       tracker.track("test", "one", "two", "three");
