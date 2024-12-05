@@ -1,8 +1,8 @@
 (() => {
   const BUFFER_LIMIT = 3;
-  const POST_INTERVAL = 1000; // 1 second
+  const POST_INTERVAL = 1000;
   const TRACK_URL = "http://localhost:8888/track";
-  
+
   const buffer = [];
   let lastSendTime = 0;
   let isSending = false;
@@ -18,23 +18,49 @@
   const sendBuffer = async () => {
     if (buffer.length === 0 || isSending) return;
     const now = Date.now();
-    if (now - lastSendTime < POST_INTERVAL && buffer.length < BUFFER_LIMIT) return;
+    if (now - lastSendTime < POST_INTERVAL && buffer.length < BUFFER_LIMIT)
+      return;
 
     isSending = true;
     const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
     try {
       const response = await fetch(TRACK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventsToSend),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          data: JSON.stringify(eventsToSend),
+        }),
       });
       if (!response.ok) throw new Error("Failed to send events");
       lastSendTime = now;
     } catch (error) {
       console.error("Error sending events:", error);
-      buffer.unshift(...eventsToSend); // Return events to the buffer
+      buffer.unshift(...eventsToSend);
+      setTimeout(sendBuffer, POST_INTERVAL);
     } finally {
       isSending = false;
+    }
+  };
+
+  const sendPendingEvents = () => {
+    if (buffer.length === 0) return;
+    const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
+    const blob = new Blob([JSON.stringify(eventsToSend)], {
+      type: "application/json; charset=UTF-8",
+    });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(TRACK_URL, blob);
+    } else {
+      fetch(TRACK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventsToSend),
+        keepalive: true,
+      }).catch((error) => {
+        console.error("Error sending events on unload:", error);
+        buffer.unshift(...eventsToSend);
+        setTimeout(sendBuffer, POST_INTERVAL);
+      });
     }
   };
 
@@ -47,6 +73,39 @@
 
   window.tracker = tracker;
 
-  // Send buffer when the page is about to unload
-  window.addEventListener("beforeunload", sendBuffer);
+  const beforeUnloadHandler = () => {
+    sendPendingEvents();
+  };
+
+  const clickHandler = async (event) => {
+    if (event.target.tagName === "A") {
+      event.preventDefault();
+      await new Promise((resolve) => {
+        const checkBuffer = () => {
+          if (buffer.length === 0 || isSending) {
+            resolve();
+          } else {
+            setTimeout(checkBuffer, 100);
+          }
+        };
+        checkBuffer();
+      });
+      sendPendingEvents();
+      setTimeout(() => {
+        window.location.href = event.target.href;
+      }, 100);
+    }
+  };
+
+  window.addEventListener("beforeunload", beforeUnloadHandler);
+  document.addEventListener("click", clickHandler);
+
+  const removeEventListeners = () => {
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    document.removeEventListener("click", clickHandler);
+  };
+
+  window.addEventListener("unload", () => {
+    removeEventListeners();
+  });
 })();
