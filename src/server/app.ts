@@ -13,13 +13,13 @@ dotenv.config();
 const app = express();
 const appHTML = express();
 
-const PORT_APP = process.env.PORT_APP || 50000;
-const PORT_TRACKER = process.env.PORT_TRACKER || 8888;
+const PORT_APP = process.env.PORT_APP;
+const PORT_TRACKER = process.env.PORT_TRACKER;
 
 connectDB();
 
 const corsOptions = {
-  origin: ["http://localhost:50000", "http://localhost:8888"],
+  origin: [`http://localhost:${PORT_APP}`, `http://localhost:${PORT_TRACKER}`],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
@@ -28,8 +28,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 appHTML.use(cors(corsOptions));
-
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,7 +40,17 @@ app.get("/tracker", (_, res) => {
 });
 
 app.post("/track", async (req, res) => {
-  const events = req.body;
+  let events;
+  if (req.body.data) {
+    try {
+      events = JSON.parse(req.body.data);
+    } catch (error) {
+      return res.status(422).send({ error: "Invalid JSON in data" });
+    }
+  } else {
+    events = req.body;
+  }
+
   if (!Array.isArray(events) || !validateEvents(events)) {
     return res.status(422).send({ error: "Invalid events" });
   }
@@ -62,13 +72,11 @@ app.post("/track", async (req, res) => {
 
 appHTML.get("/:page.html", (req, res) => {
   const { page } = req.params;
-  const validPages = ["1", "2", "3"];
-
-  if (!validPages.includes(page)) {
+  if (!["1", "2", "3"].includes(page)) {
     return res.status(404).send("Page not found");
   }
   res.type("text/html");
-  res.sendFile(path.join(__dirname, `../client/${page}.html`));
+  res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
 app.listen(PORT_TRACKER, () =>

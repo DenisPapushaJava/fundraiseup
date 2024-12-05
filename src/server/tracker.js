@@ -26,8 +26,10 @@
     try {
       const response = await fetch(TRACK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventsToSend),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          data: JSON.stringify(eventsToSend),
+        }),
       });
       if (!response.ok) throw new Error("Failed to send events");
       lastSendTime = now;
@@ -40,7 +42,7 @@
     }
   };
 
-  const sendBufferCloseSession = () => {
+  const sendPendingEvents = () => {
     if (buffer.length === 0) return;
     const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
     const blob = new Blob([JSON.stringify(eventsToSend)], {
@@ -71,9 +73,11 @@
 
   window.tracker = tracker;
 
-  window.addEventListener("beforeunload", sendBufferCloseSession);
+  const beforeUnloadHandler = () => {
+    sendPendingEvents();
+  };
 
-  document.addEventListener("click", async (event) => {
+  const clickHandler = async (event) => {
     if (event.target.tagName === "A") {
       event.preventDefault();
       await new Promise((resolve) => {
@@ -86,10 +90,22 @@
         };
         checkBuffer();
       });
-      sendBufferCloseSession();
+      sendPendingEvents();
       setTimeout(() => {
         window.location.href = event.target.href;
       }, 100);
     }
+  };
+
+  window.addEventListener("beforeunload", beforeUnloadHandler);
+  document.addEventListener("click", clickHandler);
+
+  const removeEventListeners = () => {
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    document.removeEventListener("click", clickHandler);
+  };
+
+  window.addEventListener("unload", () => {
+    removeEventListeners();
   });
 })();

@@ -1,6 +1,9 @@
 import { ITracks } from "./models/TrackerEvent.ts";
 
 export const validateEvents = (events: unknown[]): boolean => {
+  const currentTime = Math.floor(Date.now() / 1000);
+  const oneHourInSeconds = 3600;
+
   return events.every((event): event is ITracks => {
     if (typeof event !== "object" || event === null) return false;
 
@@ -14,7 +17,9 @@ export const validateEvents = (events: unknown[]): boolean => {
       typeof title === "string" &&
       typeof ts === "number" &&
       Number.isFinite(ts) &&
-      ts > 0
+      ts > 0 &&
+      ts <= currentTime &&
+      ts >= currentTime - oneHourInSeconds
     );
   });
 };
