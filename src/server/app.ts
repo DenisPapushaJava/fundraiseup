@@ -36,7 +36,7 @@ const __dirname = dirname(__filename);
 
 app.get("/tracker", (_, res) => {
   res.type("application/javascript");
-  res.sendFile(path.join(__dirname, "tracker.js"));
+  res.sendFile(path.join(__dirname, "../../dist/tracker.js"));
 });
 
 app.post("/track", async (req, res) => {

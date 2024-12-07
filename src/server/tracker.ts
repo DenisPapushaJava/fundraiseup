@@ -3,11 +3,22 @@
   const POST_INTERVAL = 1000;
   const TRACK_URL = "http://localhost:8888/track";
 
-  const buffer = [];
+  interface EventPayload {
+    event: string;
+    tags: string[];
+    url: string;
+    title: string;
+    ts: number;
+  }
+
+  const buffer: EventPayload[] = [];
   let lastSendTime = 0;
   let isSending = false;
 
-  const getEventPayload = (event, tags = []) => ({
+  const getEventPayload = (
+    event: string,
+    tags: string[] = [],
+  ): EventPayload => ({
     event,
     tags,
     url: window.location.href,
@@ -15,7 +26,7 @@
     ts: Math.floor(Date.now() / 1000),
   });
 
-  const sendBuffer = async () => {
+  const sendBuffer = async (): Promise<void> => {
     if (buffer.length === 0 || isSending) return;
     const now = Date.now();
     if (now - lastSendTime < POST_INTERVAL && buffer.length < BUFFER_LIMIT)
@@ -42,7 +53,7 @@
     }
   };
 
-  const sendPendingEvents = () => {
+  const sendPendingEvents = (): void => {
     if (buffer.length === 0) return;
     const eventsToSend = buffer.splice(0, BUFFER_LIMIT);
     const blob = new Blob([JSON.stringify(eventsToSend)], {
@@ -65,22 +76,22 @@
   };
 
   const tracker = {
-    track(event, ...tags) {
+    track(event: string, ...tags: string[]): void {
       buffer.push(getEventPayload(event, tags));
       sendBuffer();
     },
   };
 
-  window.tracker = tracker;
+  (window as any).tracker = tracker;
 
-  const beforeUnloadHandler = () =>  sendPendingEvents();
+  const beforeUnloadHandler = (): void => sendPendingEvents();
 
-  const clickHandler = async (event) => {
-    console.log(event.target.onclick.toString())
-    if (event.target.onclick.toString().includes("tracker.track")) {
+  const clickLinkHandler = async (event: MouseEvent): Promise<void> => {
+    const target = event.target as HTMLElement;
+    if (target.tagName === "A") {
       event.preventDefault();
-      await new Promise((resolve) => {
-        const checkBuffer = () => {
+      await new Promise<void>((resolve) => {
+        const checkBuffer = (): void => {
           if (buffer.length === 0 || isSending) {
             resolve();
           } else {
@@ -91,17 +102,17 @@
       });
       sendPendingEvents();
       setTimeout(() => {
-        window.location.href = event.target.href;
+        window.location.href = (target as HTMLAnchorElement).href;
       }, 100);
     }
   };
 
   window.addEventListener("beforeunload", beforeUnloadHandler);
-  document.addEventListener("click", clickHandler);
+  document.addEventListener("click", clickLinkHandler);
 
-  const removeEventListeners = () => {
+  const removeEventListeners = (): void => {
     window.removeEventListener("beforeunload", beforeUnloadHandler);
-    document.removeEventListener("click", clickHandler);
+    document.removeEventListener("click", clickLinkHandler);
   };
 
   window.addEventListener("unload", () => {
