@@ -73,12 +73,11 @@
 
   window.tracker = tracker;
 
-  const beforeUnloadHandler = () => {
-    sendPendingEvents();
-  };
+  const beforeUnloadHandler = () =>  sendPendingEvents();
 
   const clickHandler = async (event) => {
-    if (event.target.tagName === "A") {
+    console.log(event.target.onclick.toString())
+    if (event.target.onclick.toString().includes("tracker.track")) {
       event.preventDefault();
       await new Promise((resolve) => {
         const checkBuffer = () => {
