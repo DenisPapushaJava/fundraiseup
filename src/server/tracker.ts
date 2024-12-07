@@ -3,7 +3,7 @@
   const POST_INTERVAL = 1000;
   const TRACK_URL = "http://localhost:8888/track";
 
-  interface EventPayload {
+  interface ITracks {
     event: string;
     tags: string[];
     url: string;
@@ -11,14 +11,11 @@
     ts: number;
   }
 
-  const buffer: EventPayload[] = [];
+  const buffer: ITracks[] = [];
   let lastSendTime = 0;
   let isSending = false;
 
-  const getEventPayload = (
-    event: string,
-    tags: string[] = [],
-  ): EventPayload => ({
+  const getEventPayload = (event: string, tags: string[] = []): ITracks => ({
     event,
     tags,
     url: window.location.href,
