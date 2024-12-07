@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { connectDB } from "./db.ts";

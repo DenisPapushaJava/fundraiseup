@@ -7,7 +7,7 @@ export const validateEvents = (events: unknown[]): boolean => {
   return events.every((event): event is ITracks => {
     if (typeof event !== "object" || event === null) return false;
 
-    const { event: ev, tags, url, title, ts } = event as Partial<ITracks>;
+    const { event: ev, tags, url, title, ts } = event as ITracks;
 
     return (
       typeof ev === "string" &&

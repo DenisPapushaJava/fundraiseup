@@ -47,7 +47,6 @@
     } catch (error) {
       console.error("Error sending events:", error);
       buffer.unshift(...eventsToSend);
-      setTimeout(sendBuffer, POST_INTERVAL);
     } finally {
       isSending = false;
     }

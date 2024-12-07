@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface ITracks {
+export interface ITracks extends Document {
   event: string;
   tags: string[];
   url: string;
