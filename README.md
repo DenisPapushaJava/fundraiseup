@@ -12,6 +12,7 @@
 ```bash
 yarn install
 ```
+- Create a *.env* file in the root directory based on the example in *.env.example* and update the .env file with the appropriate configuration values for your environment.
 
 ## Running
 

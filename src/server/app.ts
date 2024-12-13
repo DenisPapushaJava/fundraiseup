@@ -6,6 +6,7 @@ import { connectDB } from "./db.ts";
 import { Tracks } from "./models/TrackerEvent.ts";
 import { validateEvents } from "./validate.ts";
 import { fileURLToPath } from "url";
+import { error } from "console";
 
 dotenv.config();
 
@@ -56,17 +57,11 @@ app.post("/track", async (req, res) => {
 
   res.status(200).send({ status: "ok" });
 
-  Promise.allSettled(events.map((event) => Tracks.insertMany(event)))
-    .then((results) => {
-      results.forEach((result, index) => {
-        if (result.status === "rejected") {
-          console.error(`Error saving event ${index}:`, result.reason);
-        }
-      });
-    })
-    .catch((error) => {
-      console.error("Error saving events:", error);
-    });
+  try {
+    await Tracks.insertMany(events);
+  } catch (error) {
+    console.error("Error saving events:", error);
+  }
 });
 
 appHTML.get("/:page.html", (req, res) => {
