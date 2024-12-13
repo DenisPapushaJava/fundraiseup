@@ -6,7 +6,6 @@ import { connectDB } from "./db.ts";
 import { Tracks } from "./models/TrackerEvent.ts";
 import { validateEvents } from "./validate.ts";
 import { fileURLToPath } from "url";
-import { error } from "console";
 
 dotenv.config();
 
