@@ -1,11 +1,30 @@
-<!doctype html>
 <html>
   <head>
-    <title>My website</title>
-    <script src="http://localhost:8888/tracker"></script>
+    <title>FundraiseUp</title>
     <script>
-      tracker.track('pageview');
-      tracker.track('test', 'one', 'two', 'three');
+      (function (w, d, s, u, o, a, m) {
+        w[o] =
+          w[o] ||
+          function () {
+            (w[o].q = w[o].q || []).push(arguments);
+          };
+        w[o].l = 1 * new Date();
+        a = d.createElement(s);
+        m = d.getElementsByTagName(s)[0];
+        a.async = 1;
+        a.src = u;
+        a.onload = function () {
+          tracker.track("pageview");
+          tracker.track("test", "one", "two", "three");
+        };
+        m.parentNode.insertBefore(a, m);
+      })(
+        window,
+        document,
+        "script",
+        "http://localhost:8888/tracker",
+        "tracker",
+      );
     </script>
   </head>
   <body>
